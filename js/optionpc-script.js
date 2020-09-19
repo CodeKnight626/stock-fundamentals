@@ -1,16 +1,110 @@
 // DOM manipulation
 $(document).ready(function() {
-    
+    //Variables defined to contruct a url to look for data
+    var sandbox = "https://sandbox.iexapis.com/stable/stock/"
+    var cloud = "https://cloud.iexapis.com/stable/stock/"
+    var plataform = sandbox
+    var sandboxToken = "?token=Tsk_3e712c8573f749c3aaed5e9d47a56b08"
+    var cloudToken = "?token=pk_fef2e5ad5efe46e7982adb5b5857c043"
+    var token = sandboxToken
+
+    //Variables where we'll store data
+    var marketCap = 0
+    var PE = ""
+    var EPS = 0
+    var ShsOutstand = ""
+    var income = ""
+    var PEG = ""
+    var ShsFloat = ""
+    var shortFloat = ""
+    var sales = ""
+    var PCFP =  ""
+    var ROE = ""
+    var targetPrice = ""
+    var bookSh = ""
+    var quickRatio = ""
+    var grossMargin = ""
+    var RSI14 =""
+    var cashSh = ""
+    var currentRatio =""
+    var operMargin = ""
+    var beta = ""
+    var dividend = 0
+    var debtEq = ""
+    var profitMargin = ""
+    var ATR = ""
+    var dividendPercentage = ""
+    var LTDebtEq = ""
+    var Volatility = ""
+    var price = ""
+
+    function sleep(milliseconds) {
+        var start = new Date().getTime();
+        for (var i = 0; i < 1e7; i++) {
+            if ((new Date().getTime() - start) > milliseconds) {
+            break;
+            }
+        }
+    }
+
     // Unobtrusive event binding
     document.querySelector("button")
       .addEventListener("click", function () {
 
+        //Get the symbol that's the user is looking for
+        var symbol = document.getElementById("symbol").value
+
+        //URLs used to get data
+        var statsUrl = plataform + symbol + "/stats" + token
+        var EarningsUrl =  plataform + symbol + "/earnings" + token
+        var intradaypricesUrl =  plataform + symbol + "/intraday-prices" + token
+        var dividendUrl = plataform + symbol + "/dividends" + token
+        
+
+        $ajaxUtils.sendGetRequest(statsUrl, function (res) {
+            marketCap = res.marketcap 
+            console.log(marketCap)
+            document.getElementById("marketCapAns").innerHTML = marketCap;
+        });
+        sleep(50);
+
+        $ajaxUtils.sendGetRequest(dividendUrl, function (res) {
+            dividend = res[0].amount
+            document.getElementById("dividendAns").innerHTML = dividend;
+        });
+        sleep(50);
+
+        $ajaxUtils.sendGetRequest(EarningsUrl, function (res) {
+            EPS = res.earnings[0].actualEPS
+            document.getElementById("EPSAns").innerHTML = EPS;
+        });
+        sleep(50);
+
+        $ajaxUtils.sendGetRequest(intradaypricesUrl, function (res) {
+            price = res[0].close
+            document.getElementById("priceAns").innerHTML = price;
+            document.getElementById("PRAns").innerHTML = price / EPS;
+            document.getElementById("dividendYieldAns").innerHTML = parseFloat((dividend/price) * 100).toFixed(2) + "%";
+        });
+        sleep(50);
+
+        //document.getElementById("marketCapAns").innerHTML = marketCap;
+        /*document.getElementById("dividendAns").innerHTML = dividend;
+        document.getElementById("dividendYieldAns").innerHTML = parseFloat((dividend/price) * 100).toFixed(2) + "%";
+        document.getElementById("EPSAns").innerHTML = EPS;
+        document.getElementById("priceAns").innerHTML = price;
+        document.getElementById("PRAns").innerHTML = price / EPS;*/
+
+        /*
       	var symbol = document.getElementById("symbol").value
         var url = "https://sandbox.iexapis.com/stable/stock/" + symbol + "/balance-sheet?token=Tsk_3e712c8573f749c3aaed5e9d47a56b08"
+        //var url = "https://www.difmarkets.com/es/articulos/que-es-el-market-cap-de-las-empresas-capitalizacion/"
         console.log(url)
 
         // Call server to get the name
         $ajaxUtils.sendGetRequest(url, function (res) {
+            var answer = res
+            console.log(answer)
             var symbol = res.symbol
             var reportDate = res.balancesheet[0].reportDate
             var fiscalDate = res.balancesheet[0].fiscalDate
@@ -76,21 +170,6 @@ $(document).ready(function() {
             document.getElementById("fundamentals-capitalSurplus").innerHTML = "Excedente de capital: " + capitalSurplus;
             document.getElementById("fundamentals-shareholderEquity").innerHTML = "Patrimonio de los accionistas: " + shareholderEquity;
             document.getElementById("fundamentals-netTangibleAssets").innerHTML = "activos tangibles netos: " + netTangibleAssets;
-        });
-      });
-
-/*
-	// Funcion llamada al presionar el boton submit de la forma, Inicia los calculos
-	$("#calculadora").submit(function(e) {
-		$.getJSON('https://sandbox.iexapis.com/stable/stock/twtr/price?token=Tsk_fdabbc5eda5e478da380f1649f35dc34', function(data) {
-    		// JSON result in `data` variable
-		});
-
-		document.getElementById("pie-chart").style.visibility = "visible";
-		document.getElementById("bar-chart").style.visibility = "visible";
-
-		// Cambiamos el valor de la etiqueta y mostramos el monto total
-		document.getElementById("valor-futuro").innerHTML = "Total = " + parseFloat(futureValue).toFixed(2);
-		e.preventDefault();
-	});*/
+        });*/
+    });
 });
