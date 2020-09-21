@@ -37,6 +37,15 @@ $(document).ready(function() {
     var LTDebtEq = ""
     var Volatility = ""
     var price = ""
+    var longTermDebt = ""
+    var shareholderEquity = ""
+    var inventory = ""
+    var currentAssets = ""
+    var totalCurrentLiabilities = ""
+    var pegRatio = ""
+    var currentRatio = ""
+    var cashFlow = ""
+    var netIncome = ""
 
     function sleep(milliseconds) {
         var start = new Date().getTime();
@@ -59,32 +68,79 @@ $(document).ready(function() {
         var EarningsUrl =  plataform + symbol + "/earnings" + token
         var intradaypricesUrl =  plataform + symbol + "/intraday-prices" + token
         var dividendUrl = plataform + symbol + "/dividends" + token
-        
+        var advancedStatsUrl = plataform + symbol + "/advanced-stats" + token
+        var balanceUrl = plataform + symbol + "/balance-sheet" + token
+        var cashFlowUrl = plataform + symbol + "/cash-flow" + token
+        var priceTargetUrl = plataform + symbol + "/price-target" + token
+
+        $ajaxUtils.sendGetRequest(priceTargetUrl, function (res) {
+            targetPrice = res.priceTargetAverage
+            document.getElementById("targetPriceAns").innerHTML = targetPrice;
+        });
+        sleep(100);
+
+
+        $ajaxUtils.sendGetRequest(cashFlowUrl, function (res) {
+            cashFlow = res.cashflow[0].cashFlow
+            netIncome = res.cashflow[0].netIncome
+            document.getElementById("incomeAns").innerHTML = netIncome;
+        });
+        sleep(100);
 
         $ajaxUtils.sendGetRequest(statsUrl, function (res) {
-            marketCap = res.marketcap 
+            marketCap = res.marketcap
+            ShsOutstand = res.sharesOutstanding
             console.log(marketCap)
+            console.log(cashFlow)
             document.getElementById("marketCapAns").innerHTML = marketCap;
+            document.getElementById("shsOutstandAns").innerHTML = ShsOutstand;
+            document.getElementById("PFCFAns").innerHTML = parseFloat(marketCap / cashFlow).toFixed(2);
         });
-        sleep(50);
+        sleep(100);
 
         $ajaxUtils.sendGetRequest(dividendUrl, function (res) {
+            console.log(dividendUrl)
             dividend = res[0].amount
             document.getElementById("dividendAns").innerHTML = dividend;
         });
-        sleep(50);
+        sleep(25);
 
         $ajaxUtils.sendGetRequest(EarningsUrl, function (res) {
             EPS = res.earnings[0].actualEPS
             document.getElementById("EPSAns").innerHTML = EPS;
         });
-        sleep(50);
+        sleep(200);
 
         $ajaxUtils.sendGetRequest(intradaypricesUrl, function (res) {
             price = res[0].close
             document.getElementById("priceAns").innerHTML = price;
             document.getElementById("PRAns").innerHTML = price / EPS;
             document.getElementById("dividendYieldAns").innerHTML = parseFloat((dividend/price) * 100).toFixed(2) + "%";
+        });
+        sleep(100);
+
+
+        $ajaxUtils.sendGetRequest(advancedStatsUrl, function (res) {
+            debtEq = res.debtToEquity
+            pegRatio = res.pegRatio
+            document.getElementById("debtToEqAns").innerHTML = debtEq;
+            document.getElementById("pegRatioAns").innerHTML = pegRatio;
+        });
+        sleep(100);
+
+        $ajaxUtils.sendGetRequest(balanceUrl, function (res) {
+            longTermDebt = res.balancesheet[0].longTermDebt
+            shareholderEquity = res.balancesheet[0].shareholderEquity
+            inventory = res.balancesheet[0].inventory
+            currentAssets = res.balancesheet[0].currentAssets
+            totalCurrentLiabilities = res.balancesheet[0].totalCurrentLiabilities
+            currentRatio = currentAssets / totalCurrentLiabilities
+            LTDebtEq = longTermDebt / shareholderEquity
+            quickRatio = (currentAssets - inventory) / totalCurrentLiabilities
+            
+            document.getElementById("currentRatioAns").innerHTML = parseFloat(currentRatio).toFixed(2);
+            document.getElementById("LTDebtEqAns").innerHTML = parseFloat(LTDebtEq).toFixed(2);
+            document.getElementById("quickRatioAns").innerHTML = parseFloat(quickRatio).toFixed(2);
         });
         sleep(50);
 
